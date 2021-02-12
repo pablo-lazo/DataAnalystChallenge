@@ -1,0 +1,20 @@
+karis:
+
+agregar estrategia diferenciada por tipo de clientes: empresas prefieren, familias prefieren, nonprofit prefieren
+
+revisar si hay data para verificar conversion
+
+números sobre las barras
+
+revisar ejes: 0 a 1 y 0 a 100
+
+nombres de ejes
+
+marcos:
+
+aclarar tema de segmentación por geolocalización
+
+[19:37, 10/2/2021] Sylvia Tejo: Pablo, en el título, quítale desafío técnico. Mejor pon "Caso de estudio: Bases de Datos empresa de software tipo SaaS"
+[19:39, 10/2/2021] Sylvia Tejo: En la descripción dem proyecto, trata de hacerlo ver como "Mi interés por analizar este caso de estudio nació por x necesidad, que viene a resolver x desafió, aportando x valor a las empresas de Software en el mercado."
+[19:40, 10/2/2021] Sylvia Tejo: Sorry las faltas de ortografía. El corrector ortográfico hace lo q quiere. Se manda solo
+[19:44, 10/2/2021] Sylvia Tejo: Y lo otro, termina con una conclusión del estudio. Plantéalo tal cual como un estudio.
