@@ -2,13 +2,13 @@ karis:
 
 agregar estrategia diferenciada por tipo de clientes: empresas prefieren, familias prefieren, nonprofit prefieren
 
-revisar si hay data para verificar conversion
+revisar si hay data para verificar conversion: trial -> pagado
 
-números sobre las barras
+[Dejar para revisión posterior a publicación] números sobre las barras
 
-revisar ejes: 0 a 1 y 0 a 100
+[HECHO] revisar ejes: 0 a 1 y 0 a 100
 
-nombres de ejes
+[HECHO] nombres de ejes
 
 marcos:
 
@@ -16,5 +16,85 @@ aclarar tema de segmentación por geolocalización
 
 [19:37, 10/2/2021] Sylvia Tejo: Pablo, en el título, quítale desafío técnico. Mejor pon "Caso de estudio: Bases de Datos empresa de software tipo SaaS"
 [19:39, 10/2/2021] Sylvia Tejo: En la descripción dem proyecto, trata de hacerlo ver como "Mi interés por analizar este caso de estudio nació por x necesidad, que viene a resolver x desafió, aportando x valor a las empresas de Software en el mercado."
-[19:40, 10/2/2021] Sylvia Tejo: Sorry las faltas de ortografía. El corrector ortográfico hace lo q quiere. Se manda solo
-[19:44, 10/2/2021] Sylvia Tejo: Y lo otro, termina con una conclusión del estudio. Plantéalo tal cual como un estudio.
+
+[19:44, 10/2/2021] Sylvia Tejo: Y lo otro, termina con una conclusión del estudio. Plantéalo tal cual como un estudio. <-- La mayor parte de los planes cancelados lo hacen dentro de los primeros cien días, sean de facturación anual o mensual. Es decir, la empresa tiene un lapso de 3 meses para generar la retención de los clientes.-->
+
+#### SUBS TABLE HISTOGRAMS
+
+Histograms will be drawn to check distribution the duration of the cancelled/non-renewing subscriptions. For practical reasons, cancelled and non-renewing will be labeled as the same.
+
+----
+
+# subsetting "cancelled" and "non_renewing" subscriptions
+cancelled = subs[subs["status"].isin(["cancelled", "non_renewing"])]
+cancelled.groupby(["plan"])["customer_id"].count()
+
+----
+
+# getting rid of free and trial plans because those are not paid plans
+cancelled = cancelled[~cancelled["plan"].isin(["free-yearly", "trial-daily"])]
+
+# converting timedelta "subs_duration" to int type
+cancelled["subs_duration"] = cancelled.subs_duration.dt.days.astype("int")
+
+----
+
+# checking on duration of cancelled/non-renewing subscriptions
+fig = plt.figure()
+ax = fig.gca()
+
+bins = int(math.sqrt(cancelled.subs_duration.count()))
+
+ax = plt.hist(cancelled.subs_duration, bins=bins)
+plt.title("Cancelled/Non-renewing Plan duration in days histogram", size="20", pad=18)
+plt.xlabel("Days", size=15, labelpad=18)
+plt.ylabel("Quantity", size=15, labelpad=18)
+plt.tick_params(axis="x", labelsize=14, labelrotation=-90)
+
+plt.savefig(f"{graphs_dir}/CancelledNonRenewing_duration_histogram.png",
+            bbox_inches = 'tight')
+plt.show()
+
+----
+
+Bummer. I was expecting to see a normal-like distribution so I could perform a test to verify or reject that assumption. It is very clear that this is not the case, at least for all plans at once. I'll try again creating one histogram per plan billing period unit.
+
+According to this histogram, most cancelled/non-renewing plans are terminated within the first 100 days.
+
+----
+
+# checking that billing_period_unit correlates to plan's names
+cancelled.groupby(["billing_period_unit", "plan"])["subs_duration"].count()
+
+----
+
+From the groupby operation it's pretty clear that individual-monthly is by far the most cancelled/non-renewing plan. If anything, individual-monthly should be targeted by marketing teams to develop retention strategies before the 100 days limit.
+
+----
+
+monthly = cancelled.loc[cancelled["billing_period_unit"] == "month"]
+yearly = cancelled.loc[cancelled["billing_period_unit"] == "year"]
+
+----
+
+bins = min(int(math.sqrt(monthly.subs_duration.count())),
+           int(math.sqrt(yearly.subs_duration.count())))
+
+# subplotting according to billing period unit
+fig, axs = plt.subplots(2, 1, sharex=False, figsize=(14, 18))
+
+axs[0].hist(monthly.subs_duration, bins=bins)
+axs[0].set_title("Cancelled/Non renewing monthly Plans duration in days histogram",
+                 size="20", pad=18)
+axs[0].set_xlabel("Days", size=15, labelpad=18)
+axs[0].set_ylabel("Quantity", size=15, labelpad=18)
+
+axs[1].hist(yearly.subs_duration, bins=bins)
+axs[1].set_title("Cancelled/Non renewing yearly Plans duration in days histogram",
+                 size="20", pad=18)
+axs[1].set_xlabel("Days", size=15, labelpad=18)
+axs[1].set_ylabel("Quantity", size=15, labelpad=18)
+
+plt.savefig(f"{graphs_dir}/CancelledNonRenewing_duration_histogram2.png",
+            bbox_inches = 'tight')
+plt.show()
